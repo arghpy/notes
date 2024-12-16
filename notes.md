@@ -1,7 +1,7 @@
 # Samba
 
 ```console
-$ sudo mount //<IP>/files test -o user=<USER>,defaults,noperm
+$: sudo mount //<IP>/files test -o user=<USER>,defaults,noperm
 ```
 
 These options **defaults,noperm** ate 1h30' out of my life.
