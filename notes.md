@@ -17,6 +17,8 @@ Add yourself to the docker group. Requires logout or `newgrp` command.
 
 # RHCSA
 
+## Networking
+
 Find other IPv6 nodes on the local network:
 
 ```bash
@@ -28,6 +30,8 @@ Show statistics for interface:
 ```bash
 ip -s link show eth0
 ```
+
+## Packages and repository
 
 Extract local package:
 
@@ -48,6 +52,13 @@ dnf repolist all
 dnf config-manager --enable <repo>
 ```
 
+List and install groups of packages:
+
+```bash
+dnf group list
+dnf group install '<Group_name>'
+```
+
 Import gpgkey:
 
 ```bash
@@ -61,6 +72,8 @@ dnf install sos
 sos report
 sos clean </path/to/report> # cleans the personal information from report
 ```
+
+## Timers
 
 To run an `at` command:
 
@@ -80,7 +93,8 @@ Crontab:
 5,10,15-20 * * * * ls # run ls at 5 min, 10, 15, 16, 17, 18, 19, 20
 ```
 
-Tmpfiles:
+## Temporary files
+
 Read about them. A little bit complicated
 
 ```bash
@@ -93,6 +107,8 @@ systemd-tmpfiles --create /path/to/config # to create
 systemd-tmpfiles --create /path/to/config
 ```
 
+## Archiving
+
 Automatically choose compressing algorithm by extension:
 
 ```bash
@@ -100,10 +116,13 @@ tar acf my_gzip_archive.tar.gz /etc
 tar axf my_gzip_archive.tar.gz /etc
 ```
 
+## Remote copy
+
 SFTP seems to be slow but reliable boss of file transfers.
 rsync is the fast and reliable boss of file transfers.
 
-SELinux:
+## SELinux
+
 In order to fully disable selinux in rhel9:
 
 ```bash
@@ -133,7 +152,14 @@ sealert -a /var/log/audit/audit.log # search this file for selinux reported erro
 #!!! And don't forget the restorecon after doing modifications !!!
 ```
 
-Partitions:
+SELinux add labels to ports:
+
+```bash
+semanage port --add --type <type> -p tcp/udp <port_nr>
+semanage port -a -t gopher_port_t -p tcp 71
+```
+
+## Filesystems and Partitions
 
 Wait for the system to detect the new partition:
 
@@ -153,13 +179,19 @@ Swap entry /etc/fstab:
 UUID=77777....  swap    swap    defaults    0 0
 ```
 
+Test it by running:
+
+```bash
+swapon --all
+```
+
 Extend filesystem on an xfs lvm:
 
 ```bash
 xfs_grows /dev/vg1/lv1
 ```
 
-Manage stratis fs:
+### Stratis
 
 ```bash
 dnf install stratis-cli stratisd
@@ -177,7 +209,7 @@ lsblk --output=UUID /dev/stratis/pool1/fs1 # get uuid of stratis filesystem
 UUID=c7b57190-8fba-463e-8ec8-29c80703d45e /dir1 xfs defaults,x-systemd.requires=stratisd.service 0 0 # entry in fstab
 ```
 
-NFS:
+### NFS
 
 Look for available resources:
 
@@ -193,9 +225,9 @@ Persistent mount in fstab:
 <server>:/<export>  nfs /<mountpoint>   rw  0   0
 ```
 
-Autofs:
+### Autofs
 
-Direct mappings:
+#### Direct mappings
 
 ```bash
 # Write the following as if what you want to accomplish is:
@@ -213,7 +245,7 @@ echo "/movies   -rw,sync,fstype=nfs4    homelab:/media/movies"   >> /etc/auto.me
 echo "/shows    -rw,sync,fstype=nfs4    homelab:/media/shows"    >> /etc/auto.media
 ```
 
-Indirect mappings:
+#### Indirect mappings
 
 ```bash
 # They are similar with direct mapping
@@ -233,7 +265,7 @@ echo "/media    /etc/auto.media" >> /etc/auto.master.d/media.autofs
 echo "*    -rw,sync    homelab:/media/&" >> /etc/auto.media
 ```
 
-Boot process:
+## Boot process
 
 Get and set default target:
 
@@ -248,7 +280,7 @@ To do temporary set the target while booting, in grub, add this kernel option:
 systemd.unit=rescue.target
 ```
 
-Reset root password:
+### Reset root password
 
 1. Restart the system
 2. In grub choose the rescue option
@@ -282,7 +314,7 @@ touch /.autorelabel
 
 11. Exit from everything
 
-Enable a rooted tty9 for debugging:
+### Enable a rooted tty9 for debugging
 
 ```bash
 systemctl enable debug-shell.service
@@ -293,7 +325,7 @@ systemd.debug-shell
 
 Sometimes the / (root) will need to be remounted with rw.
 
-Firewall:
+## Firewall
 
 ```bash
 firewall-cmd --get-default-zone
@@ -311,14 +343,7 @@ firewall-cmd --permanent --zone=public --add-port=82/tcp
 firewall-cmd --reload
 ```
 
-SELinux add labels to ports:
-
-```bash
-semanage port --add --type <type> -p tcp/udp <port_nr>
-semanage port -a -t gopher_port_t -p tcp 71
-```
-
-Podman:
+## Podman
 
 ```bash
 # create a configuration file with the registry
@@ -354,6 +379,10 @@ podman exec -it db01 grep mysql /etc/passwd
 podman unshare chown 27:27 /home/user/db_data
 ls -ld /home/user/db_data
 # drwxrwxr-x. 3  100026  100026 18 May  5 14:37 db_data
+
+# it might be useful to look in the configuration part of the image
+# to get an idea what is expected
+skopeo inspect docker://registry.lab.example.com/rhel9/mariadb-105
 
 # now we can attach the volume
 # BE CAREFUL TO AUTOMATICALLY SET THE CORRECT SELINUX LABEL
