@@ -408,3 +408,29 @@ podman generate systemd --name <container_name> --files --new # pass new to crea
 systemctl --user enable --now container-<container_name>.service
 loginctl enable-linger # to start services and boot and stop them at shutdown
 ```
+
+# Wireguard
+
+Besides the normal installation with pivpn, you also need to set the following for DNS:
+- dnsmasq
+
+## DNSMASQ
+
+You need to disable **systemd-resolved.service** and replace the contents of `/etc/resolv.conf` with:
+
+```text
+nameserver 127.0.0.1
+```
+
+And create the file `/etc/dnsmasq.d/wg0.conf`:
+
+```text
+# Listen on WireGuard interface only
+interface=<interface name>       # E.g: wg0
+listen-address=<ip_of_wg_server> # E.g: 10.0.0.1
+bind-interfaces
+no-resolv
+
+# Forward everything else to your LAN router
+server=<router_ip>               # E.g: 192.168.1.1
+```
