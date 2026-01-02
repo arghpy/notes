@@ -1,23 +1,4 @@
-# Samba
-
-```console
-$: sudo mount //<IP>/files test -o user=<USER>,defaults,noperm
-```
-
-These options **defaults,noperm** ate 1h30' out of my life.
-HUGE HUGE thanks to `shrimpwagon` [from the comments](https://unix.stackexchange.com/questions/92168/samba-share-permission-denied-user-writing-file-but-still-shows).
-
-# Docker
-
-## Installation
-
-Install **docker, docker-compose and docker-buildx** on arch linux.
-Start and enable **docker.socket** instead of **docker.service** to start docker only on first use, decreasing boot time.
-Add yourself to the docker group. Requires logout or `newgrp` command.
-
-# RHCSA
-
-## Networking
+# Networking
 
 Find other IPv6 nodes on the local network:
 
@@ -31,7 +12,7 @@ Show statistics for interface:
 ip -s link show eth0
 ```
 
-## Packages and repository
+# Packages and repository
 
 Extract local package:
 
@@ -73,7 +54,7 @@ sos report
 sos clean </path/to/report> # cleans the personal information from report
 ```
 
-## Timers
+# Timers
 
 To run an `at` command:
 
@@ -93,7 +74,7 @@ Crontab:
 5,10,15-20 * * * * ls # run ls at 5 min, 10, 15, 16, 17, 18, 19, 20
 ```
 
-## Temporary files
+# Temporary files
 
 Read about them. A little bit complicated
 
@@ -107,7 +88,7 @@ systemd-tmpfiles --create /path/to/config # to create
 systemd-tmpfiles --create /path/to/config
 ```
 
-## Archiving
+# Archiving
 
 Automatically choose compressing algorithm by extension:
 
@@ -116,12 +97,12 @@ tar acf my_gzip_archive.tar.gz /etc
 tar axf my_gzip_archive.tar.gz /etc
 ```
 
-## Remote copy
+# Remote copy
 
 SFTP seems to be slow but reliable boss of file transfers.
 rsync is the fast and reliable boss of file transfers.
 
-## SELinux
+# SELinux
 
 In order to fully disable selinux in rhel9:
 
@@ -159,7 +140,7 @@ semanage port --add --type <type> -p tcp/udp <port_nr>
 semanage port -a -t gopher_port_t -p tcp 71
 ```
 
-## Filesystems and Partitions
+# Filesystems and Partitions
 
 Wait for the system to detect the new partition:
 
@@ -191,7 +172,7 @@ Extend filesystem on an xfs lvm:
 xfs_grows /dev/vg1/lv1
 ```
 
-### Stratis
+## Stratis
 
 ```bash
 dnf install stratis-cli stratisd
@@ -209,7 +190,7 @@ lsblk --output=UUID /dev/stratis/pool1/fs1 # get uuid of stratis filesystem
 UUID=c7b57190-8fba-463e-8ec8-29c80703d45e /dir1 xfs defaults,x-systemd.requires=stratisd.service 0 0 # entry in fstab
 ```
 
-### NFS
+## NFS
 
 Look for available resources:
 
@@ -225,9 +206,9 @@ Persistent mount in fstab:
 <server>:/<export>  nfs /<mountpoint>   rw  0   0
 ```
 
-### Autofs
+## Autofs
 
-#### Direct mappings
+### Direct mappings
 
 ```bash
 # Write the following as if what you want to accomplish is:
@@ -245,7 +226,7 @@ echo "/movies   -rw,sync,fstype=nfs4    homelab:/media/movies"   >> /etc/auto.me
 echo "/shows    -rw,sync,fstype=nfs4    homelab:/media/shows"    >> /etc/auto.media
 ```
 
-#### Indirect mappings
+### Indirect mappings
 
 ```bash
 # They are similar with direct mapping
@@ -265,7 +246,7 @@ echo "/media    /etc/auto.media" >> /etc/auto.master.d/media.autofs
 echo "*    -rw,sync    homelab:/media/&" >> /etc/auto.media
 ```
 
-## Boot process
+# Boot process
 
 Get and set default target:
 
@@ -280,7 +261,7 @@ To do temporary set the target while booting, in grub, add this kernel option:
 systemd.unit=rescue.target
 ```
 
-### Reset root password
+## Reset root password
 
 1. Restart the system
 2. In grub choose the rescue option
@@ -314,7 +295,7 @@ touch /.autorelabel
 
 11. Exit from everything
 
-### Enable a rooted tty9 for debugging
+## Enable a rooted tty9 for debugging
 
 ```bash
 systemctl enable debug-shell.service
@@ -325,7 +306,7 @@ systemd.debug-shell
 
 Sometimes the / (root) will need to be remounted with rw.
 
-## Firewall
+# Firewall
 
 ```bash
 firewall-cmd --get-default-zone
@@ -343,7 +324,7 @@ firewall-cmd --permanent --zone=public --add-port=82/tcp
 firewall-cmd --reload
 ```
 
-## Podman
+# Podman
 
 ```bash
 # create a configuration file with the registry
@@ -407,113 +388,4 @@ podman generate systemd --name <container_name> --files --new # pass new to crea
 # move the file in ~/.config/systemd/user
 systemctl --user enable --now container-<container_name>.service
 loginctl enable-linger # to start services and boot and stop them at shutdown
-```
-
-# Wireguard
-
-Besides the normal installation with pivpn, you also need to set the following for DNS:
-- dnsmasq
-
-## DNSMASQ
-
-You need to disable **systemd-resolved.service** and replace the contents of `/etc/resolv.conf` with:
-
-```text
-nameserver 127.0.0.1
-```
-
-And create the file `/etc/dnsmasq.d/wg0.conf`:
-
-```text
-# Listen on WireGuard interface only
-interface=<interface name>       # E.g: wg0
-listen-address=<ip_of_wg_server> # E.g: 10.0.0.1
-bind-interfaces
-no-resolv
-
-# Forward everything else to your LAN router
-server=<router_ip>               # E.g: 192.168.1.1
-```
-
-# Git submodules
-
-## Adding a submodule
-
-If you want to add a git submodule to an existing repository:
-```console
-# <URL> should be a git url that anyone could use
-git submodule add <URL>
-```
-
-The resulting files can be committed separately through a PR.
-
-If you, as a developer of the submodule, would like to also commit
-into it you should:
-```console
-# <PRIVATE_URL> this could be for example the ssh version of the <URL>
-git config submodule.DbConnector.url <PRIVATE_URL>
-```
-
-## Cloning a project with a submodule
-
-Cloning is done normal.
-```console
-git clone <URL>
-```
-
-Next you will need to run:
-```console
-git submodule init
-```
-in order to initialize the local configuration, and:
-```console
-git submodule update
-```
-to update all the data and checkout the appropriate commit.
-
-These two previous commands can be combined into one:
-```console
-git submodule update --init
-```
-
-Further more, if the submodules have submodules themselves:
-```console
-git submodule update --init --recursive
-```
-
-All the previous commands in this section can be done in one go:
-```console
-git clone --recurse-submodules <URL>
-```
-
-## Working with a submodule
-
-If you want to get updates from a submodule:
-```console
-git submodule update --remote
-```
-
-Making changes in the submodules is the same as with any other git project.
-Checkout a branch and start working on it.
-
-If you want to see the changes that you made, you can do:
-```console
-git diff --submodule
-```
-
-To push the changes, go in the submodule directory and do a `git push`.
-
-If you want to do this push from the main project do:
-```console
-git push --recurse-submodules=on-demand
-```
-
-In order to not specify the recurse-submodules option:
-```
-git config --global push.recurseSubmodules on-demand
-```
-
-If you don't want to specify `--submodule` every time, do:
-```console
-git config --global diff.submodule log
 ```
