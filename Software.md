@@ -120,3 +120,11 @@ no-resolv
 # Forward everything else to your LAN router
 server=<router_ip>               # E.g: 192.168.1.1
 ```
+
+# Logical volumes (LV)
+
+Extend logical volume and also extend the filesystem:
+```bash
+lvextend -L +500G /dev/volume_hdd/media_home_surveillance --resizefs
+```
+
